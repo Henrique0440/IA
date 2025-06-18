@@ -6,11 +6,10 @@ async function sendMessage() {
         return;
     }
 
-    // Adiciona a pergunta do usuário
-    chatBox.innerHTML += `<div class="user">${pergunta}</div><br>`;
+    chatBox.innerHTML += `<div class="user">${pergunta}</div>`;
     chatBox.innerHTML += `<div class="bot">Gemini está pensando...</div>`;
 
-    // Scroll pro final
+    
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
@@ -24,19 +23,17 @@ async function sendMessage() {
 
         const data = await resposta.json();
 
-        chatBox.lastElementChild.remove(); // remove o "Gemini está pensando..."
-        chatBox.innerHTML += `<div class="bot"><strong>Gemini:</strong> ${data.resposta}</div><br>`;
+        chatBox.lastElementChild.remove(); 
+        chatBox.innerHTML += `<div class="bot"><strong>Gemini:</strong> ${data.resposta}</div>`;
         chatBox.style.display = "block";
     } catch (error) {
         console.error("Erro ao enviar a mensagem:", error);
         chatBox.innerHTML += `<div class="bot">Erro ao processar a solicitação.</div>`;
     }
 
-    // Limpa o input depois de enviar
     document.getElementById("userInput").value = "";
 }
 
-// Envia com Enter
 document.getElementById("userInput").addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
         event.preventDefault();
