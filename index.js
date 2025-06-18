@@ -1,41 +1,45 @@
-const GEMINI_API_KEY = "AIzaSyDMgyznDhS8RlfR9_vXlCz_ENot6cqU4Vc";
-
 async function sendMessage() {
-    var pergunta = document.getElementById("userInput").value;
-    var chatBox = document.getElementById("chatBox");
+    const pergunta = document.getElementById("userInput").value;
+    const chatBox = document.getElementById("chatBox");
+    if (pergunta.trim() === "") {
+        alert("Por favor, digite uma pergunta.");
+        return;
+    }
+
+    // Adiciona a pergunta do usuário
     chatBox.innerHTML += `<div class="user">${pergunta}</div><br>`;
     chatBox.innerHTML += `<div class="bot">Gemini está pensando...</div>`;
-
 
     // Scroll pro final
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        var resposta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const resposta = await fetch('https://api-gemini-henrique0440s-projects.vercel.app/api/gemini', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: pergunta }] }]
-            })
+            body: JSON.stringify({ pergunta })
         });
 
         const data = await resposta.json();
-        const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta';
-        chatBox.lastElementChild.remove();
-        chatBox.innerHTML += `<div class="bot"><strong>Gemini:</strong> ${texto}</div><br>`;
+
+        chatBox.lastElementChild.remove(); // remove o "Gemini está pensando..."
+        chatBox.innerHTML += `<div class="bot"><strong>Gemini:</strong> ${data.resposta}</div><br>`;
         chatBox.style.display = "block";
     } catch (error) {
         console.error("Erro ao enviar a mensagem:", error);
-        chatBox.innerHTML = "Ocorreu um erro ao processar sua solicitação.";
+        chatBox.innerHTML += `<div class="bot">Erro ao processar a solicitação.</div>`;
     }
+
+    // Limpa o input depois de enviar
+    document.getElementById("userInput").value = "";
 }
 
+// Envia com Enter
 document.getElementById("userInput").addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
-        event.preventDefault(); // impede quebra de linha se for um textarea
+        event.preventDefault();
         sendMessage();
-        document.getElementById("userInput").value = "";
     }
 });
