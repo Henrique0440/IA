@@ -47,6 +47,7 @@ h1 {
     padding: 10px 14px;
     border-radius: 16px 16px 0 16px;
     max-width: 80%;
+    width: fit-content;
     word-wrap: break-word;
 }
 
@@ -56,6 +57,7 @@ h1 {
     padding: 10px 14px;
     border-radius: 16px 16px 16px 0;
     max-width: 80%;
+    width: fit-content;
     word-wrap: break-word;
 }
 
