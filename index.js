@@ -1,15 +1,23 @@
 async function sendMessage() {
-    const pergunta = document.getElementById("userInput").value;
+    const input = document.getElementById("userInput");
+    const pergunta = input.value.trim();
     const chatBox = document.getElementById("chatBox");
-    if (pergunta.trim() === "") {
+
+    if (pergunta === "") {
         alert("Por favor, digite uma pergunta.");
         return;
     }
 
-    chatBox.innerHTML += `<div class="user">${pergunta}</div>`;
-    chatBox.innerHTML += `<div class="bot">Gemini está pensando...</div>`;
+    const userMsg = document.createElement("div");
+    userMsg.className = "user";
+    userMsg.textContent = pergunta;
+    chatBox.appendChild(userMsg);
 
-    
+    const loadingMsg = document.createElement("div");
+    loadingMsg.className = "bot";
+    loadingMsg.textContent = "Gemini está pensando...";
+    chatBox.appendChild(loadingMsg);
+
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
@@ -23,16 +31,22 @@ async function sendMessage() {
 
         const data = await resposta.json();
 
-        chatBox.lastElementChild.remove(); 
-        chatBox.innerHTML += `<div class="bot"><strong>Gemini:</strong> ${data.resposta}</div>`;
-        chatBox.style.display = "block";
+        loadingMsg.remove();
+
+        const botMsg = document.createElement("div");
+        botMsg.className = "bot";
+        botMsg.innerHTML = `<strong>Gemini:</strong> ${data.resposta}`;
+        chatBox.appendChild(botMsg);
+
     } catch (error) {
         console.error("Erro ao enviar a mensagem:", error);
-        chatBox.innerHTML += `<div class="bot">Erro ao processar a solicitação.</div>`;
+        loadingMsg.textContent = "Erro ao processar a solicitação.";
     }
 
-    document.getElementById("userInput").value = "";
+    input.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
+
 
 document.getElementById("userInput").addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
