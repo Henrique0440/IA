@@ -16,7 +16,7 @@ h1 {
     flex-direction: column;
     justify-content: space-between;
     background-color: #1e1e1e;
-    width: 500px;
+    width: 800px;
     height: 80vh;
     margin: 30px auto;
     border-radius: 12px;
@@ -35,7 +35,7 @@ h1 {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
     color: #e0e0e0;
 }
 
@@ -95,6 +95,19 @@ button:hover {
     background-color: #4ca0af;
     transform: scale(1.05);
 }
+
+pre {
+    background: #1e1e1e;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+}
+
+code {
+    font-size: 14px;
+}
+
 
 @media only screen and (max-width: 600px) {
     .container {
