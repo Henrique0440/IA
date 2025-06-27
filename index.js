@@ -36,7 +36,6 @@ async function sendMessage() {
 
         // Adiciona a pergunta atual
         const perguntaComContexto = `${contexto}\nUsuário: ${pergunta}`;
-        console.log("Pergunta com contexto:", perguntaComContexto);
 
         const resposta = await fetch('https://api-gemini-henrique0440s-projects.vercel.app/api/gemini', {
             method: "POST",
