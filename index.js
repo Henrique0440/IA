@@ -29,20 +29,19 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        // Junta o histórico como contexto (você pode ajustar esse formato como quiser)
         let contexto = historicoMensagens.map(msg => {
-            return `${msg.role === 'user' ? 'Usuário' : 'Bot'}: ${msg.content}`;
+            return msg.content;
         }).join('\n');
 
-        // Adiciona a pergunta atual
-        const perguntaComContexto = `${contexto}\nUsuário: ${pergunta}`;
+        const perguntaComContexto = `${contexto}\n${pergunta}`;
+        console.log("Pergunta com contexto:", perguntaComContexto);
 
         const resposta = await fetch('https://api-gemini-henrique0440s-projects.vercel.app/api/gemini', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ pergunta: perguntaComContexto }) // Apenas isso vai pra API
+            body: JSON.stringify({ pergunta: perguntaComContexto })
         });
 
 
@@ -54,19 +53,31 @@ async function sendMessage() {
         botMsg.className = "bot";
         // Verifica se a resposta contém blocos de código com ``` e converte para HTML
         let respostaFormatada = data.resposta
+            // Blocos de código
             .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
                 return `<pre><code class="language-${lang || ''}">${escapeHTML(code)}</code></pre>`;
-            });
-        respostaFormatada = respostaFormatada
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        // Lista com asterisco vira <ul><li>
-        respostaFormatada = respostaFormatada
-            .replace(/(?:^|\n)\* (.*?)(?=\n|$)/g, '<li>$1</li>');
+            })
 
-        // Se tiver <li>, envolve com <ul> automaticamente
+            // Negrito em Markdown
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+
+            // Markdown: [texto](link)
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+
+            // Links diretos (https://...)
+            .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+
+            // Listas com *
+            .replace(/(?:^|\n)\* (.*?)(?=\n|$)/g, '<li>$1</li>')
+
+            // Quebras de linha
+            .replace(/\n/g, '<br>');
+
+        // Envolve listas com <ul> se tiver <li>
         if (respostaFormatada.includes('<li>')) {
             respostaFormatada = `<ul>${respostaFormatada}</ul>`;
         }
+
 
         botMsg.innerHTML = `<strong>Gemini:</strong><br>${respostaFormatada}`;
 
@@ -76,6 +87,10 @@ async function sendMessage() {
 
         historicoMensagens.push({ role: "user", content: pergunta });
         historicoMensagens.push({ role: "bot", content: data.resposta });
+
+        while (historicoMensagens.length > 10 * 2) {
+            historicoMensagens.shift();
+        }
 
 
 
