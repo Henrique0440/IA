@@ -51,32 +51,32 @@ async function sendMessage() {
 
         const botMsg = document.createElement("div");
         botMsg.className = "bot";
-        // Verifica se a resposta contém blocos de código com ``` e converte para HTML
-        let respostaFormatada = data.resposta
-            // Blocos de código
-            .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-                return `<pre><code class="language-${lang || ''}">${escapeHTML(code)}</code></pre>`;
-            })
+        let respostaFormatada = data.resposta;
+        const codeBlocks = [];
 
-            // Negrito em Markdown
+        // Primeiro, extrai e substitui os blocos de código por marcadores temporários
+        respostaFormatada = respostaFormatada.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+            codeBlocks.push(`<pre><code class="language-${lang || ''}">${escapeHTML(code)}</code></pre>`);
+            return `{{CODEBLOCK-${codeBlocks.length - 1}}}`;
+        });
+
+        // Depois, processa o resto do texto (negrito, links, listas, quebras de linha)
+        respostaFormatada = respostaFormatada
+            .replace(/`([^`\n]+)`/g, '<code>$1</code>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-
-            // Markdown: [texto](link)
             .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-
-            // Links diretos (https://...)
             .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
-
-            // Listas com *
             .replace(/(?:^|\n)\* (.*?)(?=\n|$)/g, '<li>$1</li>')
-
-            // Quebras de linha
             .replace(/\n/g, '<br>');
 
-        // Envolve listas com <ul> se tiver <li>
+        // Envolve lista em <ul> se tiver <li>
         if (respostaFormatada.includes('<li>')) {
             respostaFormatada = `<ul>${respostaFormatada}</ul>`;
         }
+
+        // Finalmente, substitui os marcadores pelos blocos de código originais
+        respostaFormatada = respostaFormatada.replace(/\{\{CODEBLOCK-(\d+)\}\}/g, (_, index) => codeBlocks[index]);
+
 
 
         botMsg.innerHTML = `<strong>Gemini:</strong><br>${respostaFormatada}`;
@@ -140,8 +140,11 @@ async function sendMessage() {
 
 
 document.getElementById("userInput").addEventListener("keydown", function (event) {
+    const input = document.getElementById("userInput");
     if (event.key === "Enter") {
         event.preventDefault();
         sendMessage();
+        input.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 });
