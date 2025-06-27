@@ -4,11 +4,12 @@ function escapeHTML(str) {
         .replace(/>/g, '&gt;');
 }
 
-
+let historicoMensagens = [];
 async function sendMessage() {
     const input = document.getElementById("userInput");
     const pergunta = input.value.trim();
     const chatBox = document.getElementById("chatBox");
+
 
     if (pergunta === "") {
         alert("Por favor, digite uma pergunta.");
@@ -28,13 +29,23 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
+        // Junta o histórico como contexto (você pode ajustar esse formato como quiser)
+        let contexto = historicoMensagens.map(msg => {
+            return `${msg.role === 'user' ? 'Usuário' : 'Bot'}: ${msg.content}`;
+        }).join('\n');
+
+        // Adiciona a pergunta atual
+        const perguntaComContexto = `${contexto}\nUsuário: ${pergunta}`;
+        console.log("Pergunta com contexto:", perguntaComContexto);
+
         const resposta = await fetch('https://api-gemini-henrique0440s-projects.vercel.app/api/gemini', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ pergunta })
+            body: JSON.stringify({ pergunta: perguntaComContexto }) // Apenas isso vai pra API
         });
+
 
         const data = await resposta.json();
 
@@ -48,10 +59,10 @@ async function sendMessage() {
                 return `<pre><code class="language-${lang || ''}">${escapeHTML(code)}</code></pre>`;
             });
         respostaFormatada = respostaFormatada
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         // Lista com asterisco vira <ul><li>
         respostaFormatada = respostaFormatada
-        .replace(/(?:^|\n)\* (.*?)(?=\n|$)/g, '<li>$1</li>');
+            .replace(/(?:^|\n)\* (.*?)(?=\n|$)/g, '<li>$1</li>');
 
         // Se tiver <li>, envolve com <ul> automaticamente
         if (respostaFormatada.includes('<li>')) {
@@ -63,6 +74,10 @@ async function sendMessage() {
         chatBox.appendChild(botMsg);
 
         hljs.highlightAll();
+
+        historicoMensagens.push({ role: "user", content: pergunta });
+        historicoMensagens.push({ role: "bot", content: data.resposta });
+
 
 
         /*const fala = new SpeechSynthesisUtterance(data.resposta);
