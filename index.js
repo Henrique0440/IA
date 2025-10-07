@@ -56,12 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             const data = await resposta.json();
+            const respostaTexto = (data.resposta || 'Sem resposta').toString();
 
             loadingMsg.remove();
 
             const botMsg = document.createElement("div");
             botMsg.className = "bot";
-            let respostaFormatada = data.resposta;
+            let respostaFormatada = respostaTexto;
             const codeBlocks = [];
 
             // Primeiro, extrai e substitui os blocos de código por marcadores temporários
@@ -158,4 +159,5 @@ document.addEventListener("DOMContentLoaded", () => {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     });
+
 });
